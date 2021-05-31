@@ -1,6 +1,7 @@
 from Bio.PDB import *
 # hfile=open('/Users/bowendai/Documents/ProteinEng/hydro.csv','r')
-hfile=open('/dartfs-hpc/rc/lab/C/CBKlab/Bdai/pythontools/hydro.csv','r')
+# hfile=open('/dartfs-hpc/rc/lab/C/CBKlab/Bdai/pythontools/hydro.csv','r')
+hfile=open('hydro.csv','r')
 hdic={}
 for line in hfile:
     ll=line.split(':')
@@ -73,26 +74,32 @@ def getcontactbyabag(folder,file,ab='',ag=''):
                 labeldick['l'][0].append(hdic[resi.get_resname()])
                 labeldick['l'][1].append(edic[resi.get_resname()])
     return newdick,labeldick,ab,ag
-#
-# #
-# folder='/Users/bowendai/Documents/ProteinEng/'
-# folder='/Users/bowendai/Documents/Topoprotein/germ3/selectpdb/'
-# folder='/Users/bowendai/Documents/nn/pointprotein/structure-clean2/'
-# file='4jr9.pdb'
-# # file='clean1g8m-HL-G.pdb'
-# # dick,ag,ab=getcontactbyabag(folder,file)
-# dick,ag,ab=getcontactbyabag(folder,file,d=4.5,ab='HL',ag='A')
-# d1,d2, ag, ab = getcontactbyabag(folder, file, ab='HL', ag='A')
-# print len(d1['r'])
-# print len(d2['r'])
-# print len(d2['r'][0])
-# print dick
-# print ag
-# print ab
-# for l in dick:
-#     print l
-#     print len(dick[l])
-#     print sorted(dick[l])
-# #
-# # for i in structure[0][chain]:
-# #     print i
+
+def gethydro(file):
+
+    atomset=['CA','CB']
+    parser=PDBParser()
+    structure = parser.get_structure('C', file)
+    newdick=[]
+    labeldick= [[],[]]
+
+    for chain in structure[0]:
+        for resi in chain:
+            if resi.get_resname() not in hdic.keys():
+                continue
+#             print resi.get_resname()
+            cen=[0,0,0]
+            count=0
+            for atom in resi:
+                # print atom.get_coord()
+                # print list(atom.get_vector())
+                cen[0]+=atom.get_coord()[0]
+                cen[1] += atom.get_coord()[1]
+                cen[2] += atom.get_coord()[2]
+                count+=1
+            cen=[coor*1.0/count for coor in cen]
+            newdick.append(cen)
+            labeldick[0].append(hdic[resi.get_resname()])
+            labeldick[1].append(edic[resi.get_resname()])
+            
+    return newdick,labeldick
