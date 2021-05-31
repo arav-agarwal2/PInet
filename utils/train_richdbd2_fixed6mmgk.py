@@ -61,11 +61,11 @@ parser.add_argument('--class_choice', type=str, default='protein', help="class_c
 parser.add_argument('--r', type=str, default='recept', help="recept_choice")
 parser.add_argument('--l', type=str, default='ligand', help="ligand_choice")
 parser.add_argument('--fold', type=str, default='', help="kfold")
-parser.add_argument('--bs2', type=int, default=8, help="bs")
+parser.add_argument('--bs2', type=int, default=8, help="bs") #!!!!!!!!!!!!!!!!!
 parser.add_argument('--drop', type=int, default=0, help="droprate")
-parser.add_argument('--ft', type=int, default=0, help="ft")
+parser.add_argument('--ft', type=int, default=0, help="ft") #!!!!!!!!!!!!!!!!
 # from 16
-parser.add_argument('--indim', type=int, default=5, help="input dim")
+parser.add_argument('--indim', type=int, default=5, help="input dim") #!!!!!!!!!!!!
 parser.add_argument('--start', type=int, default=10, help="start epoch")
 parser.add_argument('--fac', type=float, default=100, help="start epoch")
 parser.add_argument('--lloss', type=int, default=1, help="start epoch")
@@ -165,8 +165,6 @@ if opt.model != '':
 
 optimizer = optim.Adam(classifier.parameters(), lr=0.001, betas=(0.9, 0.999))
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-classifier.cuda()
-
 
 num_batch = len(dataset_r) / opt.batchSize
 
@@ -176,7 +174,7 @@ for epoch in range(opt.nepoch):
     show_flag = 0
     totalloss = 0
     print(epoch)
-    for i, (datar,datal) in enumerate(zip(dataloader_r,dataloader_l), 0):
+    for i, (datar,datal) in tqdm(enumerate(zip(dataloader_r,dataloader_l), 0)):
         pointsr, targetr = datar
         pointsl,targetl=datal
 
@@ -185,19 +183,20 @@ for epoch in range(opt.nepoch):
         # subsample
         memlim=opt.npoints
         if pointsl.size()[1]+pointsr.size()[1]>memlim:
-            lr=pointsl.size()[1]*memlim/(pointsl.size()[1]+pointsr.size()[1])
-            rr = pointsr.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1])
+            lr=int(pointsl.size()[1]*memlim/(pointsl.size()[1]+pointsr.size()[1]))
+            rr = int(pointsr.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1]))
+
             ls=np.random.choice(pointsl.size()[1], lr, replace=False)
             rs=np.random.choice(pointsr.size()[1], rr, replace=False)
+
             pointsr=pointsr[:,rs,:]
             targetr=targetr[:,rs]
             pointsl=pointsl[:,ls,:]
             targetl=targetl[:,ls]
 
+ 
         pointsr = pointsr.transpose(2, 1)
         pointsl = pointsl.transpose(2, 1)
-        pointsr, targetr = pointsr.cuda(), targetr.cuda()
-        pointsl, targetl = pointsl.cuda(), targetl.cuda()
 
         classifier = classifier.eval()
         for m in classifier.modules():
@@ -293,8 +292,6 @@ for epoch in range(opt.nepoch):
                 pointsr = pointsr.transpose(2, 1)
                 pointsl = pointsl.transpose(2, 1)
 
-                pointsr, targetr = pointsr.cuda(), targetr.cuda()
-                pointsl, targetl = pointsl.cuda(), targetl.cuda()
                 classifier = classifier.eval()
                 try:
                     pred, _, _ = classifier(pointsr, pointsl)
