@@ -175,7 +175,8 @@ for epoch in range(opt.nepoch):
     show_flag = 0
     totalloss = 0
     print(epoch)
-    for i, (datar,datal) in tqdm(enumerate(zip(dataloader_r,dataloader_l), 0)):
+    for i, (datar,datal) in enumerate(zip(dataloader_r,dataloader_l), 0):
+        print("Hello")
         pointsr, targetr = datar
         pointsl,targetl=datal
 
@@ -200,6 +201,7 @@ for epoch in range(opt.nepoch):
         pointsl = pointsl.transpose(2, 1)
 
         classifier = classifier.eval()
+        print("Hello2")
         for m in classifier.modules():
             if m.__class__.__name__.startswith('Dropout'):
                 m.train()
@@ -213,12 +215,16 @@ for epoch in range(opt.nepoch):
         if opt.feature_transform:
             loss += feature_transform_regularizer(trans_feat1) * 0.001/opt.bs2
             loss += feature_transform_regularizer(trans_feat2) * 0.001 / opt.bs2
+        print("Hello3")
         if epoch>=opt.start:
             # compute hist loss
             predr=pred[0:targetr.size()[1]].view(-1)
             predl=pred[targetr.size()[1]:].view(-1)
             br=(torch.gt(torch.sigmoid(predr.data),0.5)==1).nonzero()
             bl = (torch.gt(torch.sigmoid(predl.data), 0.5) == 1).nonzero()
+            bls = np.random.choice(bl.size()[0], 5000, replace=False)
+            print(bl,bls, pointsl.shape)
+            print(bl[bls])
             if br.size()[0]!=0 and bl.size()[0]!=0:
                 if br.size()[0] > 5000:
 
@@ -230,7 +236,7 @@ for epoch in range(opt.nepoch):
                 if bl.size()[0] > 5000:
 
                     bls = np.random.choice(bl.size()[0], 5000, replace=False)
-                    print(bl,bls, pointsl.shape)
+
                     pl=torch.transpose(pointsl[0,0:3,bl[bls]].view(3,-1),0,1)
                 else:
                     pl = torch.transpose(pointsl[0, 0:3, bl].view(3, -1), 0, 1)
