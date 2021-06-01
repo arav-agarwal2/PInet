@@ -38,8 +38,9 @@ def pairwise_distances(x, y=None):
     return torch.clamp(dist, 0.0, np.inf)
 
 def gk(x):
-    cen=torch.nn.Parameter(torch.tensor([0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95]).float(), requires_grad=False).cuda()
-    xmat=x.float().cuda()-cen
+    cen=torch.nn.Parameter(torch.tensor([0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95]).float(), requires_grad=False)#.cuda()
+    #xmat=x.float().cuda()-cen
+    xmat=x.float()-cen
     sigma=200
     y = torch.sum(torch.sigmoid(sigma * (xmat + 0.1 / 2)) - torch.sigmoid(sigma * (xmat - 0.1 / 2)),dim=0)
     y = y / torch.sum(y)
@@ -207,7 +208,7 @@ for epoch in range(opt.nepoch):
         pred = pred.view(-1, 1)
         target=torch.cat((targetr,targetl),1)
         target = target.view(-1, 1) - 1
-        loss = 1.0/opt.bs2*F.binary_cross_entropy_with_logits(pred, target.float(),pos_weight=torch.FloatTensor([(target.size()[0]-float(target.cpu().sum()))*1.0/float(target.cpu().sum())]).cuda())
+        loss = 1.0/opt.bs2*F.binary_cross_entropy_with_logits(pred, target.float(),pos_weight=torch.FloatTensor([(target.size()[0]-float(target.cpu().sum()))*1.0/float(target.cpu().sum())]))#.cuda())
         # manual batch loss aggregate
         if opt.feature_transform:
             loss += feature_transform_regularizer(trans_feat1) * 0.001/opt.bs2
@@ -229,6 +230,7 @@ for epoch in range(opt.nepoch):
                 if bl.size()[0] > 5000:
 
                     bls = np.random.choice(bl.size()[0], 5000, replace=False)
+                    print(bl,bls, pointsl.shape)
                     pl=torch.transpose(pointsl[0,0:3,bl[bls]].view(3,-1),0,1)
                 else:
                     pl = torch.transpose(pointsl[0, 0:3, bl].view(3, -1), 0, 1)
