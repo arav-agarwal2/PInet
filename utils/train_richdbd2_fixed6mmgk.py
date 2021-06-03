@@ -38,9 +38,9 @@ def pairwise_distances(x, y=None):
     return torch.clamp(dist, 0.0, np.inf)
 
 def gk(x):
-    cen=torch.nn.Parameter(torch.tensor([0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95]).float(), requires_grad=False)#.cuda()
-    #xmat=x.float().cuda()-cen
-    xmat=x.float()-cen
+    cen=torch.nn.Parameter(torch.tensor([0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95]).float(), requires_grad=False).cuda()
+    xmat=x.float().cuda()-cen
+    #xmat=x.float()-cen
     sigma=200
     y = torch.sum(torch.sigmoid(sigma * (xmat + 0.1 / 2)) - torch.sigmoid(sigma * (xmat - 0.1 / 2)),dim=0)
     y = y / torch.sum(y)
@@ -54,7 +54,7 @@ parser.add_argument(
 parser.add_argument(
     '--nepoch', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--outf', type=str, default='seg', help='output folder')
-parser.add_argument('--npoints', type=int, default=20000, help='subsample points')
+parser.add_argument('--npoints', type=int, default=20000, help='subsample points') # Number of points sub-sampled from input
 parser.add_argument('--model', type=str, default='', help='model path')
 parser.add_argument('--dataset', type=str, required=True, help="dataset path")
 # parser.add_argument('--class_choice', type=str, default='Chair', help="class_choice")
@@ -166,6 +166,8 @@ if opt.model != '':
 
 optimizer = optim.Adam(classifier.parameters(), lr=0.001, betas=(0.9, 0.999))
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+classifier.cuda()
+
 
 num_batch = len(dataset_r) / opt.batchSize
 
@@ -177,13 +179,14 @@ for epoch in range(opt.nepoch):
     print(epoch)
     for i, (datar,datal) in enumerate(zip(dataloader_r,dataloader_l), 0):
         print("Hello")
-        pointsr, targetr = datar
+        pointsr, targetr = datar # Get data
         pointsl,targetl=datal
-
-        if targetr.sum() == 0 or targetl.sum() == 0:
+        pointsr, targetr = pointsr.cuda(), targetr.cuda()
+        pointsl, targetl = pointsl.cuda(), targetl.cuda()
+        if targetr.sum() == 0 or targetl.sum() == 0: # Check that some interaction is known to happen
             continue
         # subsample
-        memlim=opt.npoints
+        memlim=opt.npoints # Resample data size
         if pointsl.size()[1]+pointsr.size()[1]>memlim:
             lr=int(pointsl.size()[1]*memlim/(pointsl.size()[1]+pointsr.size()[1]))
             rr = int(pointsr.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1]))
@@ -201,7 +204,7 @@ for epoch in range(opt.nepoch):
         pointsl = pointsl.transpose(2, 1)
 
         classifier = classifier.eval()
-        print("Hello2")
+
         for m in classifier.modules():
             if m.__class__.__name__.startswith('Dropout'):
                 m.train()
@@ -299,7 +302,8 @@ for epoch in range(opt.nepoch):
                     targetl = targetl[:, ls]
                 pointsr = pointsr.transpose(2, 1)
                 pointsl = pointsl.transpose(2, 1)
-
+                pointsr, targetr = pointsr.cuda(), targetr.cuda()
+                pointsl, targetl = pointsl.cuda(), targetl.cuda()
                 classifier = classifier.eval()
                 try:
                     pred, _, _ = classifier(pointsr, pointsl)
