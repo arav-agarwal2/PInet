@@ -178,7 +178,7 @@ for epoch in range(opt.nepoch):
     totalloss = 0
     print(epoch)
     for i, (datar,datal) in enumerate(zip(dataloader_r,dataloader_l), 0):
-        print("Hello")
+        #print("Hello")
         pointsr, targetr = datar # Get data
         pointsl,targetl=datal
         pointsr, targetr = pointsr.cuda(), targetr.cuda()
@@ -218,7 +218,7 @@ for epoch in range(opt.nepoch):
         if opt.feature_transform:
             loss += feature_transform_regularizer(trans_feat1) * 0.001/opt.bs2
             loss += feature_transform_regularizer(trans_feat2) * 0.001 / opt.bs2
-        print("Hello3")
+        #print("Hello3")
         if epoch>=opt.start:
             # compute hist loss
             predr=pred[0:targetr.size()[1]].view(-1)
@@ -226,8 +226,8 @@ for epoch in range(opt.nepoch):
             br=(torch.gt(torch.sigmoid(predr.data),0.5)==1).nonzero()
             bl = (torch.gt(torch.sigmoid(predl.data), 0.5) == 1).nonzero()
             bls = np.random.choice(bl.size()[0], 5000, replace=False)
-            print(bl,bls, pointsl.shape)
-            print(bl[bls])
+            #print(bl,bls, pointsl.shape)
+            #print(bl[bls])
             if br.size()[0]!=0 and bl.size()[0]!=0:
                 if br.size()[0] > 5000:
 
