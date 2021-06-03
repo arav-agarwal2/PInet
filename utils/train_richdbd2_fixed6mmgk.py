@@ -226,9 +226,6 @@ for epoch in range(opt.nepoch):
             predl=pred[targetr.size()[1]:].view(-1)
             br=(torch.gt(torch.sigmoid(predr.data),0.5)==1).nonzero()
             bl = (torch.gt(torch.sigmoid(predl.data), 0.5) == 1).nonzero()
-            bls = np.random.choice(bl.size()[0], 5000, replace=False)
-            #print(bl,bls, pointsl.shape)
-            #print(bl[bls])
             if br.size()[0]!=0 and bl.size()[0]!=0:
                 if br.size()[0] > 5000:
 
