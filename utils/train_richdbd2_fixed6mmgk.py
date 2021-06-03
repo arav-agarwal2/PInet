@@ -214,7 +214,7 @@ for epoch in range(opt.nepoch):
         pred = pred.view(-1, 1)
         target=torch.cat((targetr,targetl),1)
         target = target.view(-1, 1) - 1
-        loss = 1.0/opt.bs2*F.binary_cross_entropy_with_logits(pred, target.float(),pos_weight=torch.FloatTensor([(target.size()[0]-float(target.cpu().sum()))*1.0/float(target.cpu().sum())])).cuda())
+        loss = 1.0/opt.bs2*F.binary_cross_entropy_with_logits(pred, target.float(),pos_weight=torch.FloatTensor([(target.size()[0]-float(target.cpu().sum()))*1.0/float(target.cpu().sum())]).cuda())
         # manual batch loss aggregate
         if opt.feature_transform:
             loss += feature_transform_regularizer(trans_feat1) * 0.001/opt.bs2
@@ -292,8 +292,8 @@ for epoch in range(opt.nepoch):
 
                 memlim = 90000
                 if pointsl.size()[1] + pointsr.size()[1] > memlim:
-                    lr = pointsl.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1])
-                    rr = pointsr.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1])
+                    lr = int(pointsl.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1]))
+                    rr = int(pointsr.size()[1] * memlim / (pointsl.size()[1] + pointsr.size()[1]))
                     ls = np.random.choice(pointsl.size()[1], lr, replace=False)
                     rs = np.random.choice(pointsr.size()[1], rr, replace=False)
 
