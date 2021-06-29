@@ -15,6 +15,16 @@ Generate label for trainning
 
 Replace 2I25-l.pdb and 2I25-r.pdb by your input pair of pdbs. File name format should be XXXX*.pdb where XXXX is the id.  
 
+## Simple Prediction
+run  
+
+> python SimplePredictor.py 2I25-l.pts 2I25-r.pts
+
+## Simple Residue Prediction Aggregation
+run  
+
+> python PredictionPoint2Residue.py 2I25
+
 ## Setup
 run 
 > pip install -e .
@@ -38,6 +48,13 @@ Dbd 5
 dataset folder should follow dbd folder structure
 input data should be a n-by-5 matrix, with columns' order [x,y,z,electrostatic,hydrophobicity]   
 dbd data are now avalable at https://www.dropbox.com/sh/qqi9op061mfxbmo/AADibYuDdMF4n2bDS3uqiEVha?dl=0
+
+
+EpiPred 
+dataset folder should follow dbd folder structure
+input data should be a n-by-5 matrix, with columns' order [x,y,z,electrostatic,hydrophobicity]   
+EpiPred data are now avalable at https://www.dropbox.com/sh/wnrn65y4vfs2m84/AABSFL8IeWh_U7gQO2__ZFEHa?dl=0
+
   
 ## Preprocess Helper
 utils/pdb2wrlpymol2_pub.py  
