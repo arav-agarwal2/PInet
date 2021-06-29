@@ -37,6 +37,8 @@ cmd.delete('all')
 
 # wrl to pts
 
+print("Mrr")
+
 holder = []
 normholder =[]
 cf=0
@@ -87,17 +89,18 @@ print(lcoord)
 
 
 if train_flag:
-
+    print("HIII")
     tol=np.array([2,2,2])
 
     contact = (np.abs(np.asarray(lcoord[:, None]) - np.asarray(rcoord))<tol).all(2).astype(np.int)
-
+    print("HI")
     llabel=np.max(contact,axis=1)
     rlabel=np.max(contact,axis=0)
-    
+    print(llabel.shape)
     np.savetxt(pdbfile_l[0:4]+'-l.seg',llabel)
     np.savetxt(pdbfile_r[0:4]+'-r.seg',rlabel)
-    
+ 
+print("He")   
 # pdb 2 pqr
 # pdb2pqr='/path/to/pdb2pqr-linux-bin64-2.1.0/pdb2pqr'
 # apbsflag='--whitespace --ff=amber -v --apbs-input'
@@ -152,6 +155,7 @@ clfr.fit(centroid_r,hlabelr*10)
 distl,indl=clfl.kneighbors(lcoord)
 distr,indr= clfr.kneighbors(rcoord)
 
+"""
 apbsl=open(pdbfile_l[0:4]+'-l.pqr.dx','r')
 apbsr = open(pdbfile_r[0:4] + '-r.pqr.dx','r')
 
@@ -162,11 +166,11 @@ gr, orr, dr, vr = parsefile(apbsr)
 avl=findvalue(lcoord, gl, orl, dl, vl)
 avr = findvalue(rcoord, gr, orr, dr, vr)
 
-
+"""
 
 lpred=np.sum(hlabell[indl]*distl,1)/np.sum(distl,1)/10.0
 rpred = np.sum(hlabelr[indr] * distr, 1) / np.sum(distr, 1)/10.0
 
 
-np.savetxt(pdbfile_l[0:4]+'-l.pts',np.concatenate((lcoord,np.expand_dims(avl,1),np.expand_dims(lpred,1)),axis=1))
-np.savetxt(pdbfile_r[0:4]+'-r.pts',np.concatenate((rcoord, np.expand_dims(avr,1),np.expand_dims(rpred,1)),axis=1))
+np.savetxt(pdbfile_l[0:4]+'-l.pts',np.concatenate((lcoord, np.expand_dims(lpred,1)),axis=1))
+np.savetxt(pdbfile_r[0:4]+'-r.pts',np.concatenate((rcoord, np.expand_dims(rpred,1)),axis=1))
